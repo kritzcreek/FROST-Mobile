@@ -70,9 +70,8 @@ main = do
   -- until Websocket support is given by the server
   -- let sockEmitter = EmptySocket
   -- Initial State
-  appSt <- newSTRef emptyState
+  appSt <- newSTRef myState1
   -- Initial Render
-  renderMenu (show <$> topicTypes)
   readSTRef appSt >>= renderApp
 
   --Request Initial State
