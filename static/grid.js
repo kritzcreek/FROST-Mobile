@@ -1,3 +1,5 @@
+React.initializeTouchEvents(true);
+
 var ListGroup = ReactBootstrap.ListGroup;
 var ListGroupItem = ReactBootstrap.ListGroupItem;
 
@@ -21,15 +23,12 @@ Grid = React.createClass({
                                  "HH:mm").format("LT");
             return (
                 <ListGroupItem key={block.blockDescription}
-                onClick={this.select.bind(this, block, index)}>
-                <div>
-                  <div>
-                    {block.blockDescription}
-                  </div>
+                className="clickable"
+                onClick={this.select.bind(this, block, index)}
+                header={block.blockDescription}>
                   <div>
                     {timeStart + " - " + timeEnd}
                   </div>
-                </div>
                 </ListGroupItem>
             );
           },this);
@@ -37,11 +36,15 @@ Grid = React.createClass({
       return topicsForRoom.map(function(topicForRoom) {
         var room = topicForRoom[0];
         var topic = topicForRoom[1].value0;
-          return (
-              <ListGroupItem key={room.roomName}>
-                <div>{room.roomName}</div>
-                <div>{topic ? topic.topicDescription : ''}</div>
-              </ListGroupItem>);
+          if(topic){
+              return(
+                  <ListGroupItem key={room.roomName}
+                  header={topic.topicDescription}>
+                    <div>{room.roomName}</div>
+                    {topic.topicTyp}
+                  </ListGroupItem>
+              );
+          }
         }, this);
     }
     if(this.state.selected == null){
@@ -52,8 +55,9 @@ Grid = React.createClass({
     }else{
        return(
         <ListGroup>
-          <ListGroupItem key="back" onClick={this.select.bind(this, null, null)}>
-            {"Zurück"}
+          <ListGroupItem key="back" className="clickable"
+           onClick={this.select.bind(this, null, null)}>
+            Zurück
           </ListGroupItem>
           {rooms(this.state.selected, this.topicsForIndex(this.state.index))}
         </ListGroup>

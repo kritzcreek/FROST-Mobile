@@ -64,3 +64,6 @@ span.glyphicon-arrow-left {
     padding-right: 5px;
     padding-left: 10px;
 }
+.clickable {
+    cursor: pointer;
+}
