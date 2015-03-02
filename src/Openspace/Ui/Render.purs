@@ -71,5 +71,4 @@ foreign import renderGrid
 renderApp :: forall eff. AppState -> Eff( dom::DOM | eff ) Unit
 renderApp as = do
   let as' = sanitizeAppState as
-  renderTopics $ as'.topics
   renderGrid as.rooms (sort as.blocks) (makeGrid as)
