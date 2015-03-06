@@ -46,7 +46,7 @@ Grid = React.createClass({
               );
           }
         }, this);
-    }
+    };
     if(this.state.selected == null){
       return(
         <ListGroup>
