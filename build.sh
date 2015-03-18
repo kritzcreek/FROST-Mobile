@@ -17,8 +17,6 @@ cp static/index.html build/index.html
 #CSS
 cp static/main.css build/css/main.css
 cp bower_components/bootstrap/dist/css/bootstrap.min.css build/css/
-cp bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css build/css/
-
 
 #FONTS
 cp bower_components/bootstrap/fonts/glyphicons-halflings-regular.woff build/fonts/
@@ -32,5 +30,4 @@ cp bower_components/rxjs/dist/rx.lite.min.js build/js/lib/
 cp bower_components/rxjs/dist/rx.lite.map build/js/lib/
 cp bower_components/rxjs-jquery/rx.jquery.js build/js/lib/
 cp bower_components/lodash/lodash.js build/js/lib/
-cp bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js build/js/lib/
 cp bower_components/moment/moment.js build/js/lib/

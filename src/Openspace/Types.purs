@@ -222,7 +222,13 @@ instance actionAsForeign :: AsForeign Action where
     toForeign { tag: "DeleteBlock"
               , contents: b }
 
-  serialize (AssignTopic s t) = serializeAssignTopic s t
+  serialize (AssignTopic s t) =
+    toForeign { tag: "AssignTopic"
+              , contents:
+                [ toForeign s, toForeign t ]
+              }
+
+    --serializeAssignTopic s t
   serialize (UnassignTopic (Topic t)) =
     toForeign { tag: "UnassignTopic"
               , contents: { topicDescription: t.topicDescription

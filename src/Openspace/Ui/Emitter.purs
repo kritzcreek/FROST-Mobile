@@ -13,31 +13,20 @@ import           Rx.Observable
 
 import           DOM
 
-type Emitter = Tuple String (Observable J.JQueryEvent)
-type Emitters = M.Map String (Observable J.JQueryEvent)
+type Observer = Tuple String (Observable J.JQueryEvent)
+type Observers = M.Map String (Observable J.JQueryEvent)
 
 mkObservable :: forall eff. J.JQuery -> String -> Eff(dom :: DOM | eff) (Tuple String (Observable J.JQueryEvent))
 mkObservable emitter event = (Tuple event) <$> (event `onAsObservable` emitter)
 
-getEmitters :: forall eff. Eff(dom :: DOM | eff) Emitters
-getEmitters = do
-    menuEmitter <- J.select "#menuContainer"
-    let menu = mkObservable menuEmitter <$> ["addTopic", "dragOverTrash"
-                                            , "dragLeaveTrash"]
-
-    topicEmitter <- J.select "#topicsContainer"
-    let topic = mkObservable topicEmitter <$> ["dragStartTopic", "dragEndTopic"]
-
+getObservers :: forall eff. Eff(dom :: DOM | eff) Observers
+getObservers = do
     gridEmitter <- J.select "#gridContainer"
-    let grid = mkObservable gridEmitter <$> [ "dragOverSlot", "dragLeaveSlot"
-                                            , "addRoom", "deleteRoom"
-                                            , "addBlock", "deleteBlock"
-                                            , "dragStartGridTopic", "dragEndGridTopic"
-                                            , "removeBlock", "removeRoom"]
+    let grid = mkObservable gridEmitter <$> [ "dragOverSlot"]
 
-    M.fromList <$> (sequence $ menu `append` topic `append` grid)
+    M.fromList <$> (sequence grid)
 
-emitterLookup :: Emitters -> String -> Observable J.JQueryEvent
+emitterLookup :: Observers -> String -> Observable J.JQueryEvent
 emitterLookup es s =
   case M.lookup s es of
     Just ob -> ob

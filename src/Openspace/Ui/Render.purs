@@ -39,17 +39,6 @@ makeGrid as = (\r ->
                 (\b -> findIn r b as.timeslots ) <$> (sort as.blocks)
               ) <$> as.rooms
 
-foreign import renderTopics
-  """function renderTopics(topics){
-    return function(){
-      React.render(
-        React.createElement(Topics, {topics: topics}),
-        document.getElementById('topics')
-        )
-      }
-    }
-    """ :: forall eff. [SanitizedTopic] -> Eff( dom::DOM | eff ) Unit
-
 foreign import renderGrid
   """
   function renderGrid(rooms){
