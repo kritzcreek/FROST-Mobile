@@ -7,7 +7,7 @@ import           Data.Array (append)
 import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Traversable
-import Data.Tuple hiding(zip)
+import           Data.Tuple hiding(zip)
 import           Rx.JQuery
 import           Rx.Observable
 

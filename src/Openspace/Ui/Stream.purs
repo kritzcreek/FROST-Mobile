@@ -20,7 +20,7 @@ netStream socket = do
 
 main = do
   -- TODO: getSocket :: Either SockErr Socket
-  let sockEmitter = getSocket "ws://192.168.5.113/socket"
+  let sockEmitter = getSocket "ws://localhost:8080/socket"
   -- Initial State
   appSt <- newSTRef myState1
   -- Initial Render

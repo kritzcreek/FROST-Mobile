@@ -1,13 +1,10 @@
-# FROST - Frontend
+# FROST - Mobile
 
-React.js View >>= RX Binding >>= Purescript Controller.
-
-There is a hosted version at [OpenSpace](http://178.62.90.204/build/). Since this version is updated manually it might not always be up-to-date.
+This is the Mobile Frontend for the FROST Application. It utilizes Functional Reactive Programming to provide a robust approach to complex UI-Design. Eventually this project should be packaged into a Hybrid Web Application, supporting integration with Dropbox and push notifications.
 
 ## Required Tooling:
  - [psc/psc-make](http://www.purescript.org/)
  - [npm](http://nodejs.org/)
- - [bower](http://bower.io/)
  - [pulp](https://github.com/bodil/pulp)
  - [react-tools](https://www.npmjs.com/package/react-tools)
 
