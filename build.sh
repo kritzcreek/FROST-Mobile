@@ -9,7 +9,7 @@ mkdir build/fonts
 #grunt
 pulp browserify --source-map -O --main "Openspace.Ui.Stream" --to build/js/index.js
 
-jsx static/ build/js/
+jsx -x jsx static/ build/js/
 
 #HTML
 cp static/index.html build/index.html
@@ -23,7 +23,7 @@ cp bower_components/bootstrap/fonts/glyphicons-halflings-regular.woff build/font
 cp bower_components/bootstrap/fonts/glyphicons-halflings-regular.woff2 build/fonts/
 
 #JS
-cp bower_components/react/react.min.js build/js/lib/
+cp bower_components/react/react.js build/js/lib/
 cp bower_components/react-bootstrap/react-bootstrap.js build/js/lib/
 cp bower_components/jquery/dist/jquery.js build/js/lib/
 cp bower_components/rxjs/dist/rx.lite.min.js build/js/lib/

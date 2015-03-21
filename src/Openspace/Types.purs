@@ -228,7 +228,6 @@ instance actionAsForeign :: AsForeign Action where
                 [ toForeign s, toForeign t ]
               }
 
-    --serializeAssignTopic s t
   serialize (UnassignTopic (Topic t)) =
     toForeign { tag: "UnassignTopic"
               , contents: { topicDescription: t.topicDescription
@@ -246,23 +245,26 @@ function parseAssignTopic(foreign) {
   }
   """ :: Foreign -> Foreign
 
+-----------------
+--| UiActions |--
+-----------------
+data UiAction =
+  SelectBlock Block
+  | UnselectBlock
+  | ChooseTopic Topic
+  | UnchooseTopic Topic
 
-foreign import serializeAssignTopic
-"""
-function serializeAssignTopic(slot) {
-  return function(topic){
-    return { tag: "AssignTopic",
-             contents:[
-               slot,
-               {
-                 topicDescription: topic.topicDescription
-                 , topicTyp: Prelude.show(showTopicType)(topic.topicTyp)
-               }
-             ]
-           }
-  }
-}
-""" :: Slot -> Topic -> Foreign
+instance uiActionIsForeign :: IsForeign UiAction where
+  read val = case readProp "tag" val of
+    Right "SelectBlock" -> do
+      b <- readProp "contents" val :: F Block
+      return $ SelectBlock b
+    Right "ChooseTopic" -> do
+      t <- readProp "contents" val :: F Topic
+      return $ ChooseTopic t
+    Right "UnchooseTopic" -> do
+      t <- readProp "contents" val :: F Topic
+      return $ UnchooseTopic t
 
 -------------------------
 --| Entire AppState |--
@@ -276,20 +278,17 @@ type AppState = { topics :: [Topic]
                 , timeslots :: M.Map Slot Topic
                 }
 
-type SanitizedTopic = { topicDescription :: String, topicTyp :: String }
-type SanitizedSlot =  { room :: String, block :: String }
-type SanitizedTimeslot = Tuple SanitizedSlot SanitizedTopic
+type Timetable = [Topic]
 
-type SanitizedAppState = { topics :: [SanitizedTopic]
-                         , rooms :: [Room]
-                         , blocks :: [String]
-                         , timeslots :: [SanitizedTimeslot]
-                         }
+type UiState =
+  { personalTimetable :: Timetable
+  , selectedBlock :: Maybe Block
+  }
 
  --------------------
  --| Dummy Values |--
  --------------------
-
+emptyUiState = { personalTimetable: [], selectedBlock: Nothing }
 emptyState = {topics: [], rooms:[], blocks:[], timeslots: (M.empty) :: M.Map Slot Topic }
 
 myRoom = Room {roomName: "Berlin", roomCapacity: 100}

@@ -26,8 +26,8 @@
   },
   "devDependencies": {},
   "resolutions": {
-    "purescript-tuples": "0.3.0",
+    "purescript-tuples": "0.3.1",
     "purescript-monoid": "~0.2.0",
-    "purescript-foldable-traversable": "0.3.0"
+    "purescript-foldable-traversable": "~0.3.0"
   }
 }
