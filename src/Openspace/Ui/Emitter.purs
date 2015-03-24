@@ -22,8 +22,8 @@ mkObservable emitter event = (Tuple event) <$> (event `onAsObservable` emitter)
 getObservers :: forall eff. Eff(dom :: DOM | eff) Observers
 getObservers = do
     gridEmitter <- J.select "#gridContainer"
-    let grid = mkObservable gridEmitter <$> [ "dragOverSlot"]
-
+    let grid = mkObservable gridEmitter <$>
+               ["SelectBlock", "UnselectBlock", "ChooseTopic", "UnchooseTopic"]
     M.fromList <$> (sequence grid)
 
 emitterLookup :: Observers -> String -> Observable J.JQueryEvent

@@ -22,6 +22,13 @@ actionFromForeign parser actionConstructor f =
     Right a -> actionConstructor a
     Left e -> ShowError (show e)
 
+uiActionFromForeign :: forall a. Parser a -> (a -> UiAction) -> Foreign -> UiAction
+uiActionFromForeign parser actionConstructor f =
+  case parser f of
+    Right a -> actionConstructor a
+    _ -> UnselectBlock
+
+
 parseAction :: Foreign -> F Action
 parseAction fa = do
   a <- read fa :: F Action
