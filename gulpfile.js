@@ -5,6 +5,7 @@ var purescript = require('gulp-purescript');
 var paths = {
   'psc': 'src/**/*.purs',
   'javascript': 'static/*js',
+  'static': 'static/**/*',
   'pscLib': 'bower_components/*/src/**/*.purs'
 };
 
@@ -37,8 +38,13 @@ gulp.task('purescript', function(){
   );
 });
 
+gulp.task('watch', function() {
+  gulp.watch(paths.psc, ['default']);
+  gulp.watch(paths.static, ['default']);
+});
+
 gulp.task('default', ['purescript', 'copy-index-html', 'copy-css',
-          'copy-fonts', 'copy-bullshit'], function() {
+          'copy-fonts', 'copy-bullshit', 'watch'], function() {
   return gulp.src('static/entry.js')
     .pipe(webpack(require('./webpack.config.js')))
     .pipe(gulp.dest('dist/'));
