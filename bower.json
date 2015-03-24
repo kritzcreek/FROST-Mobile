@@ -18,11 +18,7 @@
     "purescript-maps": "*",
     "purescript-rx": "*",
     "purescript-foreign": "*",
-    "lodash": "*",
-    "react": "*",
-    "bootstrap": "*",
-    "react-bootstrap": "*",
-    "moment": "*"
+    "bootstrap": "*"
   },
   "devDependencies": {},
   "resolutions": {
