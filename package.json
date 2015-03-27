@@ -1,7 +1,7 @@
 {
-  "name": "FROST-Frontend",
+  "name": "FROST-Mobile",
   "version": "0.1.0",
-  "description": "The Frontend for the FROST Application.",
+  "description": "The Mobile-Frontend for the FROST Application.",
   "main": "",
   "private": false,
   "author": "kRITZCREEK",
