@@ -5,9 +5,12 @@ import {ListGroup, ListGroupItem} from 'react-bootstrap'
 import _ from 'lodash'
 import moment from 'moment'
 import {Maybe, Just, Nothing} from 'Data.Maybe'
-import {formatBlock} from 'babel!./personalTimetable.js'
+import {formatBlock} from 'babel!./components/list-item-block.js'
+import ListItemBlock from 'babel!./components/list-item-block.js'
+
 
 React.initializeTouchEvents(true);
+
 
 var Grid = React.createClass({
   emit: function(event){
@@ -26,18 +29,9 @@ var Grid = React.createClass({
   },
   render: function(){
     var blocks = this.props.blocks
-          .map(function(block) {
-            return (
-              <ListGroupItem key={block.blockDescription}
-                className="clickable"
-                onClick={this.selectHandler.bind(this, block)}
-                header={block.blockDescription}>
-                <div>
-                  {formatBlock(block)}
-                </div>
-              </ListGroupItem>
-            );
-          }, this);
+          .map( block => {
+            return ( <ListItemBlock block={block} onClick={ this.selectHandler.bind(this, block) } /> );
+          });
 
     var rooms = function(self, block, topicsForRoom) {
       return topicsForRoom.map(function({room: room, topic: topic}) {
@@ -60,10 +54,10 @@ var Grid = React.createClass({
       return (
         <div id='gridContainer'>
           <ListGroup>
-           <ListGroupItem key="back" className="clickable"
-             onClick={this.unselectHandler}>
-           Zurück
-         </ListGroupItem>
+           <ListGroupItem key="back">
+              <span className="glyphicon glyphicon-menu-left" onClick={this.unselectHandler}/>
+           </ListGroupItem>
+           <ListItemBlock block={this.props.selectedBlock.value0} bsStyle="success" />
            {rooms(this, this.props.selectedBlock, this.props.topicsForBlock)}
           </ListGroup>
         </div>

@@ -11,7 +11,7 @@
     "babel-loader": "^4.2.0",
     "bower": "*",
     "gulp": "^3.8.11",
-    "gulp-purescript": "^0.1.2",
+    "gulp-purescript": "^0.2.0",
     "gulp-webpack": "^1.3.0",
     "purs-loader": "0.0.3",
     "webpack": "^1.7.3"
