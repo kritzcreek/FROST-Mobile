@@ -18,7 +18,6 @@ export function formatBlock(
 
 var ListItemBlock = React.createClass({
     render() {
-      console.log(this.props.block)
       var block = this.props.block;
       return (
         <ListGroupItem key={block.blockDescription}
