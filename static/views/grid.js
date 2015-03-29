@@ -48,7 +48,8 @@ var Grid = React.createClass({
     };
 
     if(this.props.selectedBlock instanceof Just){
-      let backDisplay = ( <span><i className="mdi-navigation-arrow-back"/> Back </span>);
+      let backDisplay = ( <span><i className="mdi-navigation-arrow-back"
+        style={{'fontSize': '25px', 'position': 'relative', 'top': '5px'}}/> Back </span>);
       return (
         <div id='gridContainer'>
           <ListItemBlock block={this.props.selectedBlock.value0}

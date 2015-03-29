@@ -22,9 +22,11 @@ mkObservable emitter event = (Tuple event) <$> (event `onAsObservable` emitter)
 getObservers :: forall eff. Eff(dom :: DOM | eff) Observers
 getObservers = do
     gridEmitter <- J.select "#gridContainer"
+    timetableEmitter <- J.select "#personalTimetableContainer"
     let grid = mkObservable gridEmitter <$>
                ["SelectBlock", "UnselectBlock", "ChooseTopic", "UnchooseTopic"]
-    M.fromList <$> (sequence grid)
+    let personalTimetable = mkObservable timetableEmitter <$> ["UnselectTopic"] 
+    M.fromList <$> (sequence $ grid `append` personalTimetable)
 
 emitterLookup :: Observers -> String -> Observable J.JQueryEvent
 emitterLookup es s =

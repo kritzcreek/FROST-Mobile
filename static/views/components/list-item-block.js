@@ -18,7 +18,11 @@ export function formatBlock(
 var ListItemBlock = React.createClass({
     generateActions (actions=[]) {
       return actions.map(({handler, display}) => {
-          return <div className="card-action"> <a onClick={handler}>{display}</a></div>;
+          return (<div className="card-action" style={{padding: '10px', marginBottom: '2px'}}>
+                    <a style={{position: 'relative', bottom: '5px'}} onClick={handler}>
+                      {display}
+                    </a>
+                  </div>);
         });
     },
     render() {
