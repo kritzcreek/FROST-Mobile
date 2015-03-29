@@ -16,7 +16,7 @@ var TopicListItem = React.createClass({
           </div>
           <div className="col s3">
             <p className={isChosen ? 'mdi-action-favorite': 'mdi-action-favorite-outline'}
-              style={{fontSize: '30px', color: '#00897b'}}></p>
+              style={{fontSize: '40px', color: '#00897b', marginLeft: '-20px'}}></p>
           </div>
         </div>
       </li>

@@ -30,7 +30,7 @@ uiStream = do
           <$> emitters "ChooseTopic"
 
       unchooseTopic = (uiActionFromForeign parseTopic UnchooseTopic) <<< getDetail
-          <$> emitters "UnchooseTopic"
+          <$> (emitters "UnchooseTopic" <|> emitters "UnselectTopic")
 
   return $ selectBlock <|> unselectBlock <|> chooseTopic <|> unchooseTopic
 
