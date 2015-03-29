@@ -17,8 +17,7 @@
     "purescript-maybe": "*",
     "purescript-maps": "*",
     "purescript-rx": "*",
-    "purescript-foreign": "*",
-    "bootstrap": "*"
+    "purescript-foreign": "*"
   },
   "devDependencies": {},
   "resolutions": {
