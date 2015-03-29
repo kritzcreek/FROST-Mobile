@@ -1,12 +1,13 @@
 'use strict';
 
 import React from 'react'
-import {ListGroup, ListGroupItem} from 'react-bootstrap'
 import _ from 'lodash'
 import moment from 'moment'
 import {Maybe, Just, Nothing} from 'Data.Maybe'
-import {formatBlock} from 'babel!./components/list-item-block.js'
-import ListItemBlock from 'babel!./components/list-item-block.js'
+import {formatBlock} from 'babel!./components/list-item-block'
+import ListItemBlock from 'babel!./components/list-item-block'
+import TopicListItem from 'babel!./components/topic-list-item'
+
 
 
 React.initializeTouchEvents(true);
@@ -29,45 +30,39 @@ var Grid = React.createClass({
   },
   render: function(){
     var blocks = this.props.blocks
-          .map( block => {
-            return ( <ListItemBlock block={block} onClick={ this.selectHandler.bind(this, block) } /> );
-          });
+          .map( (block, index) =>
+            <ListItemBlock block={block} onClick={ this.selectHandler.bind(this, block) } key={index} />
+          );
 
-    var rooms = function(self, block, topicsForRoom) {
-      return topicsForRoom.map(function({room: room, topic: topic}) {
-        let isChosen = self.props.personalTimetable
+    var topics = (block, topicsForRoom) => {
+      return topicsForRoom.map(({room: room, topic: topic}, index) => {
+        let isChosen = this.props.personalTimetable
           .filter( t => t.topicDescription === topic.topicDescription
                         && t.topicTyp === topic.topicTyp).length !== 0;
         return (
-          <ListGroupItem key={room.roomName}
-            bsStyle={isChosen ? 'info': null}
-            onClick={self.clickTopicHandler.bind(self, topic, isChosen)}
-            header={topic.topicDescription}>
-              <div>{room.roomName}</div>
-              {topic.topicTyp}
-          </ListGroupItem>
+          <TopicListItem topic={topic} room={room}
+            onClick={this.clickTopicHandler.bind(this, topic, isChosen)}
+            isChosen={isChosen} key={index}/>
         );
-        });
+      }, this);
     };
 
     if(this.props.selectedBlock instanceof Just){
+      let backDisplay = ( <span><i className="mdi-navigation-arrow-back"
+        style={{'fontSize': '25px', 'position': 'relative', 'top': '5px'}}/> Back </span>);
       return (
         <div id='gridContainer'>
-          <ListGroup>
-           <ListGroupItem key="back">
-              <span className="glyphicon glyphicon-menu-left" onClick={this.unselectHandler}/>
-           </ListGroupItem>
-           <ListItemBlock block={this.props.selectedBlock.value0} bsStyle="success" />
-           {rooms(this, this.props.selectedBlock, this.props.topicsForBlock)}
-          </ListGroup>
+          <ListItemBlock block={this.props.selectedBlock.value0}
+           actions={[{ handler: this.unselectHandler, display: backDisplay}]} />
+          <ul className="collection">
+           {topics(this.props.selectedBlock, this.props.topicsForBlock)}
+          </ul>
         </div>
       );
     }else{
       return (
         <div id='gridContainer'>
-          <ListGroup>
             {blocks}
-          </ListGroup>
         </div>
       );
     }

@@ -8,6 +8,9 @@ import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Tuple
 
+class AsForeign a where
+  serialize :: a -> Foreign
+
 -----------------
 --| TopicType |--
 -----------------
@@ -47,11 +50,13 @@ instance eqTopic :: Eq Topic where
   (/=) t1 t2 = not (t1 == t2)
 
 instance foreignTopic :: IsForeign Topic where
-    read val = do
-      topic <- readProp "topicDescription" val :: F String
-      typ   <- readProp "topicTyp"   val :: F TopicType
-      return $ Topic { topicDescription: topic, topicTyp: typ }
+  read val = do
+    topic <- readProp "topicDescription" val :: F String
+    typ   <- readProp "topicTyp"   val :: F TopicType
+    return $ Topic { topicDescription: topic, topicTyp: typ }
 
+instance asForeignTopic :: AsForeign Topic where
+  serialize (Topic t) = toForeign $ { topicDescription: t.topicDescription, topicTyp: show t.topicTyp }
 
 ------------
 --| Slot |--
@@ -188,9 +193,6 @@ read val = case readProp "tag" val of
     m <- readProp "message" val :: F String
     return $ ShowError m
   Left e -> Right $ ShowError (show e)
-
-class AsForeign a where
-  serialize :: a -> Foreign
 
 instance actionAsForeign :: AsForeign Action where
   serialize (AddTopic (Topic t)) =

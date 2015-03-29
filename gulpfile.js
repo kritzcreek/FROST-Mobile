@@ -1,3 +1,4 @@
+'use strict';
 var gulp = require('gulp');
 var webpack = require('gulp-webpack');
 var purescript = require('gulp-purescript');
@@ -8,17 +9,6 @@ var paths = {
   'static': 'static/**/*',
   'pscLib': 'bower_components/*/src/**/*.purs'
 };
-
-gulp.task('copy-css', function() {
-   gulp.src(['static/main.css',
-             'bower_components/bootstrap/dist/css/bootstrap.min.css'])
-   .pipe(gulp.dest('./dist/css'));
-});
-
-gulp.task('copy-fonts', function() {
-   gulp.src('bower_components/bootstrap/fonts/*.{woff,woff2}')
-   .pipe(gulp.dest('./dist/fonts'));
-});
 
 gulp.task('copy-index-html', function() {
     gulp.src('static/index.html')
@@ -43,8 +33,8 @@ gulp.task('watch', function() {
   gulp.watch(paths.static, ['default']);
 });
 
-gulp.task('default', ['purescript', 'copy-index-html', 'copy-css',
-          'copy-fonts', 'copy-bullshit', 'watch'], function() {
+gulp.task('default', ['purescript', 'copy-index-html',
+                      'copy-bullshit', 'watch'], function() {
   return gulp.src('static/entry.js')
     .pipe(webpack(require('./webpack.config.js')))
     .pipe(gulp.dest('dist/'));

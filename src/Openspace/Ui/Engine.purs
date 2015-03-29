@@ -2,7 +2,8 @@ module Openspace.Ui.Engine where
 
 import Openspace.Types
 import Data.Maybe (Maybe(..))
-import Data.Array (delete)
+import Data.Array (delete, concatMap, filter)
+import Data.Foldable (elem)
 
 evalUiAction :: UiAction -> UiState -> UiState
 evalUiAction (SelectBlock b) us =
@@ -22,4 +23,15 @@ evalActionOnUi (DeleteBlock b) us =
   where unselectIfEqual b mb = if Just b == mb
                                then Nothing
                                else mb
+-- This removes Topics from the Personal Timetable that aren't contained in the requested Application state to prevent leaks.
+evalActionOnUi (ReplayActions as) us =
+  us { personalTimetable = filter (flip elem validTopics) us.personalTimetable}
+  where
+    validTopics :: [Topic]
+    validTopics = concatMap isAddTopic as
+
+    isAddTopic :: Action -> [Topic]
+    isAddTopic (AddTopic a) = [a]
+    isAddTopic _ = []
+
 evalActionOnUi _ us = us

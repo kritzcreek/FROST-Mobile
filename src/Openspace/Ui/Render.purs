@@ -4,6 +4,7 @@ import           Control.Apply
 import           Control.Monad.Eff
 import           DOM
 import           Data.Array
+import           Data.Foreign
 import           Data.Function
 import qualified Data.Map as M
 import           Data.Maybe
@@ -11,30 +12,25 @@ import           Data.Tuple
 import           Debug.Trace
 import           Openspace.Types
 
-type SanitizedTopic = { topicDescription :: String, topicTyp :: String }
-type AssignedTopic = { topic :: SanitizedTopic, room :: Room, block :: Block}
+type AssignedTopic = { topic :: Foreign, room :: Room, block :: Block}
 type SanitizedTimetable = [AssignedTopic]
 
-type TopicsForBlock = [{topic :: SanitizedTopic, room :: Room}]
+type TopicsForBlock = [{topic :: Foreign, room :: Room}]
 
 topicsForBlock :: Block -> AppState -> TopicsForBlock
 topicsForBlock b as =
   concatMap (\r -> f (findIn r b as.timeslots) r) as.rooms
   where
-    f :: Maybe SanitizedTopic -> Room -> TopicsForBlock
+    f :: Maybe Foreign -> Room -> TopicsForBlock
     f s r = case s of
       Just t -> [{topic: t, room: r}]
       Nothing -> []
 
-sanitizeTopic :: Topic -> SanitizedTopic
-sanitizeTopic (Topic t) = { topicDescription: t.topicDescription,
-                            topicTyp: show t.topicTyp }
-
-findIn :: Room -> Block -> M.Map Slot Topic -> Maybe SanitizedTopic
+findIn :: Room -> Block -> M.Map Slot Topic -> Maybe Foreign
 findIn r b timeslots = M.lookup (Slot {block:b, room:r}) timeslots
-                       <#> sanitizeTopic
+                       <#> serialize
 
-makeGrid :: AppState -> [[Maybe SanitizedTopic]]
+makeGrid :: AppState -> [[Maybe Foreign]]
 makeGrid as = (\r ->
                 (\b -> findIn r b as.timeslots ) <$> (sort as.blocks)
               ) <$> as.rooms
@@ -54,7 +50,7 @@ foreign import renderGridImpl
       );
     }
   }
-  """ :: forall eff. Fn4 [Block] (Maybe Block) TopicsForBlock [SanitizedTopic] (Eff( dom::DOM | eff ) Unit)
+  """ :: forall eff. Fn4 [Block] (Maybe Block) TopicsForBlock [Foreign] (Eff( dom::DOM | eff ) Unit)
 
 foreign import renderPersonalTimetableImpl
   """
@@ -83,7 +79,7 @@ renderPersonalTimetable as us =
         topicIndex t = findIndex (isTopic t) timeslots
 
         construct :: Tuple Slot Topic -> [AssignedTopic]
-        construct (Tuple (Slot s) t) = singleton { topic: sanitizeTopic t, block: s.block, room: s.room }
+        construct (Tuple (Slot s) t) = singleton { topic: serialize t, block: s.block, room: s.room }
 
         isTopic :: Topic -> Tuple Slot Topic -> Boolean
         isTopic t tuple = t == snd tuple
@@ -95,7 +91,7 @@ renderGrid :: forall eff. AppState -> UiState -> Eff( dom::DOM | eff ) Unit
 renderGrid as us = runFn4 renderGridImpl blocks us.selectedBlock topics timetable
   where topics = maybe [] (flip topicsForBlock as) us.selectedBlock
         blocks = (sort as.blocks)
-        timetable = (sanitizeTopic <$> us.personalTimetable)
+        timetable = (serialize <$> us.personalTimetable)
 
 renderApp :: forall eff. AppState -> UiState -> Eff( dom::DOM, trace::Trace | eff ) Unit
 renderApp as us = renderGrid as us *> renderPersonalTimetable as us
