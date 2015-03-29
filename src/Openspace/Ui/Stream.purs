@@ -14,6 +14,7 @@ import Openspace.Ui.Emitter
 import Openspace.Ui.Parser
 import Openspace.Ui.Render
 import Openspace.Ui.Engine
+import Openspace.Ui.Localstorage
 import Rx.Observable
 
 uiStream :: forall eff. Eff ( dom :: DOM, trace :: Trace| eff ) (Observable UiAction)
@@ -42,9 +43,11 @@ netStream socket = do
 main = do
   -- TODO: getSocket :: Either SockErr Socket
   hostName <- getHost
+  --let sockEmitter = getSocket ("ws://" ++ "frost.kritzcreek.me" ++ "/socket")
   let sockEmitter = getSocket ("ws://" ++ hostName ++ "/socket")
   -- Initial State
-  uiSt <- newSTRef emptyUiState
+  
+  uiSt <- getTimetable "timetable" >>= newSTRef
   appSt <- newSTRef myState1
   -- Initial Render
   renderApp emptyState emptyUiState
@@ -61,8 +64,10 @@ main = do
   subscribe net (\a -> do
                     appState <- modifySTRef appSt (evalAction a)
                     uiState <- modifySTRef uiSt (evalActionOnUi a)
+                    setTimetable "timetable" uiState
                     renderApp appState uiState)
   subscribe ui (\a-> do
                    appState <- readSTRef appSt
-                   newUiState <- modifySTRef uiSt (evalUiAction a)
-                   renderApp appState newUiState)
+                   uiState <- modifySTRef uiSt (evalUiAction a)
+                   setTimetable "timetable" uiState
+                   renderApp appState uiState)
