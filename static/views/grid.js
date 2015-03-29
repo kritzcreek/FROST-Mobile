@@ -4,8 +4,10 @@ import React from 'react'
 import _ from 'lodash'
 import moment from 'moment'
 import {Maybe, Just, Nothing} from 'Data.Maybe'
-import {formatBlock} from 'babel!./components/list-item-block.js'
-import ListItemBlock from 'babel!./components/list-item-block.js'
+import {formatBlock} from 'babel!./components/list-item-block'
+import ListItemBlock from 'babel!./components/list-item-block'
+import TopicListItem from 'babel!./components/topic-list-item'
+
 
 
 React.initializeTouchEvents(true);
@@ -28,32 +30,21 @@ var Grid = React.createClass({
   },
   render: function(){
     var blocks = this.props.blocks
-          .map( block => {
-            return ( <ListItemBlock block={block} onClick={ this.selectHandler.bind(this, block) } /> );
-          });
+          .map( (block, index) =>
+            <ListItemBlock block={block} onClick={ this.selectHandler.bind(this, block) } key={index} />
+          );
 
-    var rooms = function(self, block, topicsForRoom) {
-      return topicsForRoom.map(function({room: room, topic: topic}) {
-        let isChosen = self.props.personalTimetable
+    var topics = (block, topicsForRoom) => {
+      return topicsForRoom.map(({room: room, topic: topic}, index) => {
+        let isChosen = this.props.personalTimetable
           .filter( t => t.topicDescription === topic.topicDescription
                         && t.topicTyp === topic.topicTyp).length !== 0;
         return (
-          <li key={room.roomName}
-            onClick={self.clickTopicHandler.bind(self, topic, isChosen)}
-            className="collection-item">
-            <div className="row">
-              <div className="col s9">
-                <h5>{topic.topicDescription}</h5>
-                {topic.topicTyp} - {room.roomName}
-              </div>
-              <div className="col s3">
-                <p className={isChosen ? 'mdi-action-favorite': 'mdi-action-favorite-outline'}
-                  style={{fontSize: '30px', color: '#00897b'}}></p>
-              </div>
-            </div>
-          </li>
+          <TopicListItem topic={topic} room={room}
+            onClick={this.clickTopicHandler.bind(this, topic, isChosen)}
+            isChosen={isChosen} key={index}/>
         );
-        });
+      }, this);
     };
 
     if(this.props.selectedBlock instanceof Just){
@@ -63,7 +54,7 @@ var Grid = React.createClass({
           <ListItemBlock block={this.props.selectedBlock.value0}
            actions={[{ handler: this.unselectHandler, display: backDisplay}]} />
           <ul className="collection">
-           {rooms(this, this.props.selectedBlock, this.props.topicsForBlock)}
+           {topics(this.props.selectedBlock, this.props.topicsForBlock)}
           </ul>
         </div>
       );

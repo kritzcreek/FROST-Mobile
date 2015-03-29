@@ -24,7 +24,7 @@ var ListItemBlock = React.createClass({
     render() {
       var block = this.props.block;
       return (
-        <div key={block.blockDescription} {...this.props}>
+        <div key={this.props.key} {...this.props}>
           <div className="z-depth-2 card teal darken-1">
             <div className="card-content white-text">
               <span className="card-title">{block.blockDescription}</span>
