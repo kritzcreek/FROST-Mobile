@@ -23,7 +23,7 @@ evalActionOnUi (DeleteBlock b) us =
   where unselectIfEqual b mb = if Just b == mb
                                then Nothing
                                else mb
--- This removes Topics from the Personal Timetabel that aren't contained in the requested Application state to prevent leaks.
+-- This removes Topics from the Personal Timetable that aren't contained in the requested Application state to prevent leaks.
 evalActionOnUi (ReplayActions as) us =
   us { personalTimetable = filter (flip elem validTopics) us.personalTimetable}
   where

@@ -19,9 +19,10 @@ function saveImpl(key) {
     }
   }
 }
-""" :: forall eff. String -> [SanitizedTopic] -> Eff( storage :: Storage |eff) Unit
+""" :: forall eff. String -> [Foreign] -> Eff( storage :: Storage |eff) Unit
 
-save key ts = saveImpl key $ sanitizeTopic <$> ts
+save :: forall eff. String -> [Topic] -> Eff( storage :: Storage |eff) Unit
+save key ts = saveImpl key $ serialize <$> ts
 
 foreign import getImpl
 """
