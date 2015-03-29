@@ -1,7 +1,6 @@
 'use strict';
 
 import React from 'react'
-import {ListGroup, ListGroupItem} from 'react-bootstrap'
 import _ from 'lodash'
 import moment from 'moment'
 import {Maybe, Just, Nothing} from 'Data.Maybe'
@@ -39,35 +38,39 @@ var Grid = React.createClass({
           .filter( t => t.topicDescription === topic.topicDescription
                         && t.topicTyp === topic.topicTyp).length !== 0;
         return (
-          <ListGroupItem key={room.roomName}
-            bsStyle={isChosen ? 'info': null}
+          <li key={room.roomName}
             onClick={self.clickTopicHandler.bind(self, topic, isChosen)}
-            header={topic.topicDescription}>
-              <div>{room.roomName}</div>
-              {topic.topicTyp}
-          </ListGroupItem>
+            className="collection-item">
+            <div className="row">
+              <div className="col s9">
+                <h5>{topic.topicDescription}</h5>
+                {topic.topicTyp} - {room.roomName}
+              </div>
+              <div className="col s3">
+                <p className={isChosen ? 'mdi-action-favorite': 'mdi-action-favorite-outline'}
+                  style={{fontSize: '30px', color: '#00897b'}}></p>
+              </div>
+            </div>
+          </li>
         );
         });
     };
 
     if(this.props.selectedBlock instanceof Just){
+      let backDisplay = ( <span><i className="mdi-navigation-arrow-back"/> Back </span>);
       return (
         <div id='gridContainer'>
-          <ListGroup>
-           <ListGroupItem key="back">
-              <span className="glyphicon glyphicon-menu-left" onClick={this.unselectHandler}/>
-           </ListGroupItem>
-           <ListItemBlock block={this.props.selectedBlock.value0} bsStyle="success" />
+          <ListItemBlock block={this.props.selectedBlock.value0}
+           actions={[{ handler: this.unselectHandler, display: backDisplay}]} />
+          <ul className="collection">
            {rooms(this, this.props.selectedBlock, this.props.topicsForBlock)}
-          </ListGroup>
+          </ul>
         </div>
       );
     }else{
       return (
         <div id='gridContainer'>
-          <ListGroup>
             {blocks}
-          </ListGroup>
         </div>
       );
     }

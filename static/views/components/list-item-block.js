@@ -1,7 +1,6 @@
 'use strict';
 import React from 'react';
 import moment from 'moment';
-import {ListGroupItem} from 'react-bootstrap';
 
 
 export function formatBlock(
@@ -13,21 +12,27 @@ export function formatBlock(
 }) {
   let start = moment( startH + ':' + startM, 'HH:mm').format('LT');
   let end = moment( endH + ':' + endM, 'HH:mm').format('LT');
-  return start + '-' + end;
+  return start + ' - ' + end;
 }
 
 var ListItemBlock = React.createClass({
+    generateActions (actions=[]) {
+      return actions.map(({handler, display}) => {
+          return <div className="card-action"> <a onClick={handler}>{display}</a></div>;
+        });
+    },
     render() {
       var block = this.props.block;
       return (
-        <ListGroupItem key={block.blockDescription}
-          className="clickable"
-          header={block.blockDescription}
-          {...this.props}>
-          <div>
-            {formatBlock(block)}
+        <div key={block.blockDescription} {...this.props}>
+          <div className="z-depth-2 card teal darken-1">
+            <div className="card-content white-text">
+              <span className="card-title">{block.blockDescription}</span>
+              <p>{formatBlock(block)}</p>
+            </div>
+            {this.generateActions(this.props.actions)}
           </div>
-        </ListGroupItem>);
+        </div> );
     }
 });
 
