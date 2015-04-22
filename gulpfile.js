@@ -15,6 +15,11 @@ gulp.task('copy-index-html', function() {
     .pipe(gulp.dest('./dist'));
 });
 
+gulp.task('copy-css', function() {
+    gulp.src('static/main.css')
+    .pipe(gulp.dest('./dist/css'));
+});
+
 gulp.task('copy-bullshit', function() {
    gulp.src(['bower_components/jquery/dist/jquery.js',
              'bower_components/rxjs/dist/rx.lite.js',
@@ -34,7 +39,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('default', ['purescript', 'copy-index-html',
-                      'copy-bullshit', 'watch'], function() {
+                      'copy-bullshit', 'copy-css', 'watch'], function() {
   return gulp.src('static/entry.js')
     .pipe(webpack(require('./webpack.config.js')))
     .pipe(gulp.dest('dist/'));

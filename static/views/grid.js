@@ -8,13 +8,11 @@ import {formatBlock} from 'babel!./components/list-item-block'
 import ListItemBlock from 'babel!./components/list-item-block'
 import TopicListItem from 'babel!./components/topic-list-item'
 
-
-
 React.initializeTouchEvents(true);
 
 
 var Grid = React.createClass({
-  emit: function(event){
+  emit (event){
     this.getDOMNode().dispatchEvent(event);
   },
   selectHandler: function(block){
@@ -28,10 +26,11 @@ var Grid = React.createClass({
       new CustomEvent(isChosen ? 'UnchooseTopic' : 'ChooseTopic', {'detail': topic})
     );
   },
-  render: function(){
+  render (){
     var blocks = this.props.blocks
           .map( (block, index) =>
-            <ListItemBlock block={block} onClick={ this.selectHandler.bind(this, block) } key={index} />
+            <ListItemBlock block={block}
+              onClick={ this.selectHandler.bind(this, block) } key={index} />
           );
 
     var topics = (block, topicsForRoom) => {
