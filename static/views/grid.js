@@ -29,7 +29,7 @@ var Grid = React.createClass({
   render (){
     var blocks = this.props.blocks
           .map( (block, index) =>
-            <ListItemBlock block={block}
+            <ListItemBlock block={block} className="clickable"
               onClick={ this.selectHandler.bind(this, block) } key={index} />
           );
 
@@ -39,7 +39,7 @@ var Grid = React.createClass({
           .filter( t => t.topicDescription === topic.topicDescription
                         && t.topicTyp === topic.topicTyp).length !== 0;
         return (
-          <TopicListItem topic={topic} room={room}
+          <TopicListItem topic={topic} room={room} className="clickable"
             onClick={this.clickTopicHandler.bind(this, topic, isChosen)}
             isChosen={isChosen} key={index}/>
         );
@@ -47,8 +47,12 @@ var Grid = React.createClass({
     };
 
     if(this.props.selectedBlock instanceof Just){
-      let backDisplay = ( <span><i className="mdi-navigation-arrow-back"
-        style={{'fontSize': '25px', 'position': 'relative', 'top': '5px'}}/> Back </span>);
+        let backDisplay = ( <span>
+                            <i className="mdi-navigation-arrow-back clickable"
+                            style={{'fontSize': '25px',
+                                    'position': 'relative',
+                                    'top': '5px'}}/>
+                            Back </span>);
       return (
         <div id='gridContainer'>
           <ListItemBlock block={this.props.selectedBlock.value0}

@@ -14,7 +14,7 @@ var TimetableListItem = React.createClass({
             <div> {formatBlock(block)} </div>
           </div>
           <div className="col s3">
-            <p className={'mdi-navigation-cancel'}
+            <p className="mdi-navigation-cancel clickable"
               style={{fontSize: '40px', color: '#ef5350', marginLeft: '-30px', paddingTop: '40px'}}
               onClick={handler}></p>
           </div>
