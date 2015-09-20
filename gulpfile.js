@@ -1,14 +1,23 @@
 'use strict';
 var gulp = require('gulp');
-var webpack = require('gulp-webpack');
+var webpack = require('webpack-stream');
 var purescript = require('gulp-purescript');
 
 var paths = {
-  'psc': 'src/**/*.purs',
+  'psc': ['src/**/*.purs', 'src/**/*.js'],
   'javascript': 'static/*js',
-  'static': 'static/**/*',
-  'pscLib': 'bower_components/*/src/**/*.purs'
+  'static': 'static/**/*'
 };
+
+var sources = [
+  'src/**/*.purs',
+  'bower_components/purescript-*/src/**/*.purs'
+];
+
+var foreigns = [
+  'src/**/*.js',
+  'bower_components/purescript-*/src/**/*.js'
+];
 
 gulp.task('copy-index-html', function() {
     gulp.src('static/index.html')
@@ -27,11 +36,10 @@ gulp.task('copy-bullshit', function() {
    .pipe(gulp.dest('./dist/js/lib'));
 });
 
-gulp.task('purescript', function(){
-  return gulp.src([paths.psc, paths.pscLib]).
-    pipe(purescript.pscMake()
-  );
+gulp.task('purescript', function () {
+  return purescript.psc({ src: sources, ffi: foreigns });
 });
+
 
 gulp.task('watch', function() {
   gulp.watch(paths.psc, ['default']);

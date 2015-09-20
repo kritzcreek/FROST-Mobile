@@ -1,18 +1,14 @@
 module Openspace.Ui.Parser where
 
-import Control.Monad.JQuery
-import Data.Either
-import Data.Foreign
-import Data.Foreign.Class
-import Data.Tuple (Tuple(..))
-import Openspace.Types
+import qualified Control.Monad.Eff.JQuery as J
+import           Data.Either
+import           Data.Foreign
+import           Data.Foreign.Class
+import           Data.Tuple (Tuple(..))
+import           Openspace.Types
+import           Prelude
 
-foreign import getDetail
-"""
-function getDetail (e){
-    return e.originalEvent.detail;
-}
-""" :: JQueryEvent -> Foreign
+foreign import getDetail :: J.JQueryEvent -> Foreign
 
 type Parser a = Foreign -> F a
 
@@ -27,7 +23,6 @@ uiActionFromForeign parser actionConstructor f =
   case parser f of
     Right a -> actionConstructor a
     _ -> UnselectBlock
-
 
 parseAction :: Foreign -> F Action
 parseAction fa = do

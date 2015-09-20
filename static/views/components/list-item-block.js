@@ -2,13 +2,12 @@
 import React from 'react';
 import moment from 'moment';
 
-
 export function formatBlock(
 {
-  blockStartHours: startH,
-  blockStartMinutes: startM,
-  blockEndHours: endH,
-  blockEndMinutes: endM
+  startHours: startH,
+  startMinutes: startM,
+  endHours: endH,
+  endMinutes: endM
 }) {
   let start = moment( startH + ':' + startM, 'HH:mm').format('LT');
   let end = moment( endH + ':' + endM, 'HH:mm').format('LT');
@@ -33,7 +32,7 @@ var ListItemBlock = React.createClass({
         <div key={this.props.key} {...this.props}>
           <div className="z-depth-2 card teal darken-1">
             <div className="card-content white-text">
-              <span className="card-title">{block.blockDescription}</span>
+              <span className="card-title">{block.description}</span>
               <p>{formatBlock(block)}</p>
             </div>
             {this.generateActions(this.props.actions)}

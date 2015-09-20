@@ -1,5 +1,6 @@
 module Openspace.Ui.Localstorage where
 
+import Prelude
 import Data.Maybe
 import Data.Either
 import Data.Foreign
@@ -10,36 +11,15 @@ import Openspace.Ui.Render
 
 foreign import data Storage :: !
 
-foreign import saveImpl 
-"""
-function saveImpl(key) {
-  return function(ts){
-    return function(){
-      localStorage.setItem(key, JSON.stringify(ts));
-    }
-  }
-}
-""" :: forall eff. String -> [Foreign] -> Eff( storage :: Storage |eff) Unit
+foreign import saveImpl :: forall eff. String -> Array SanitizedTopic -> Eff( storage :: Storage |eff) Unit
 
-save :: forall eff. String -> [Topic] -> Eff( storage :: Storage |eff) Unit
-save key ts = saveImpl key $ serialize <$> ts
+save :: forall eff. String -> Array Topic -> Eff( storage :: Storage |eff) Unit
+save key ts = saveImpl key $ sanitizeTopic <$> ts
 
-foreign import getImpl
-"""
-function getImpl(key) {
-  return function(){
-    try{
-      return JSON.parse(localStorage.getItem(key));
-    } 
-    catch(e){
-      return [];
-    }
-  }
-}
-""" :: forall eff. String -> Eff( storage :: Storage | eff) Foreign
+foreign import getImpl :: forall eff. String -> Eff( storage :: Storage | eff) Foreign
 
-get :: forall eff. String -> Eff( storage :: Storage | eff) [Topic]
-get key = do 
+get :: forall eff. String -> Eff( storage :: Storage | eff) (Array Topic)
+get key = do
   ts <- getImpl key
   return $ case read ts of
              Right tt -> tt
@@ -50,5 +30,5 @@ setTimetable :: forall eff. String -> UiState -> Eff( storage :: Storage | eff) 
 setTimetable key us = save key us.personalTimetable
 
 getTimetable :: forall eff. String -> Eff( storage :: Storage | eff) UiState
-getTimetable key = (\k -> { selectedBlock: Nothing
-                          , personalTimetable: k}) <$> get key
+getTimetable key = { selectedBlock: Nothing
+                    , personalTimetable: _} <$> get key

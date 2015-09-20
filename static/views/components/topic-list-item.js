@@ -11,8 +11,8 @@ var TopicListItem = React.createClass({
         className="collection-item clickable">
         <div className="row">
           <div className="col s9">
-            <h5>{topic.topicDescription}</h5>
-            {topic.topicTyp} - {room.roomName}
+            <h5>{topic.description}</h5>
+            {topic.typ} - {room.name}
           </div>
           <div className="col s3">
             <p className={isChosen ? 'mdi-action-favorite'

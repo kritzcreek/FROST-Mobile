@@ -1,15 +1,16 @@
 module Openspace.Types where
 
+import Prelude
 import           Data.Either
 import           Data.Foreign
 import           Data.Foreign.Class
 import           Data.Foreign.Index
 import qualified Data.Map as M
+import           Data.Generic
 import           Data.Maybe
 import           Data.Tuple
-
-class AsForeign a where
-  serialize :: a -> Foreign
+import           Global (isFinite, isNaN)
+import           Data.List (toList)
 
 -----------------
 --| TopicType |--
@@ -19,14 +20,13 @@ data TopicType = Discussion
                | Presentation
                | Workshop
 
-instance eqTopicType :: Eq TopicType where
-(==) tt1 tt2 = show tt1 == show tt2
-(/=) tt1 tt2 = show tt1 /= show tt2
+derive instance genericTopicType :: Generic TopicType
 
 instance showTopicType :: Show TopicType where
-  show Discussion = "Discussion"
-  show Presentation = "Presentation"
-  show Workshop = "Workshop"
+  show = gShow
+
+instance eqTopicType :: Eq TopicType where
+  eq = gEq
 
 instance foreignTopicType :: IsForeign TopicType where
   read val = case readString val of
@@ -42,21 +42,24 @@ topicTypes = [Discussion, Presentation, Workshop]
 --| Topics |--
 --------------
 
-newtype Topic = Topic { topicDescription :: String
-                      , topicTyp   :: TopicType }
+newtype Topic = Topic { description :: String
+                      , typ         :: TopicType
+                      , host        :: String}
+
+derive instance genericTopic :: Generic Topic
 
 instance eqTopic :: Eq Topic where
-  (==) (Topic t1) (Topic t2) = t1.topicDescription == t2.topicDescription && t1.topicTyp == t2.topicTyp
-  (/=) t1 t2 = not (t1 == t2)
+  eq (Topic t1) (Topic t2) = t1.description == t2.description
+                             && t1.typ == t2.typ
+                             && t1.host == t2.host
 
 instance foreignTopic :: IsForeign Topic where
-  read val = do
-    topic <- readProp "topicDescription" val :: F String
-    typ   <- readProp "topicTyp"   val :: F TopicType
-    return $ Topic { topicDescription: topic, topicTyp: typ }
-
-instance asForeignTopic :: AsForeign Topic where
-  serialize (Topic t) = toForeign $ { topicDescription: t.topicDescription, topicTyp: show t.topicTyp }
+  read val = Topic <$> (
+    { description: _, typ: _, host: _ } <$>
+    readProp "description" val <*>
+    readProp "typ" val <*>
+    readProp "host" val
+    )
 
 ------------
 --| Slot |--
@@ -64,83 +67,93 @@ instance asForeignTopic :: AsForeign Topic where
 
 newtype Slot = Slot { room :: Room, block :: Block }
 
+derive instance genericSlot :: Generic Slot
+
 instance eqSlot :: Eq Slot where
-  (==) (Slot s1) (Slot s2) = s1.room == s2.room && s1.block == s2.block
-  (/=) (Slot s1) (Slot s2) = s1.room /= s2.room || s1.block /= s2.block
+ eq (Slot s1) (Slot s2) = s1.room == s2.room && s1.block == s2.block
 
 instance ordSlot :: Ord Slot where
-  compare (Slot s1) (Slot s2) = (show s1.room ++ show s1.block) `compare` (show s2.room ++ show s2.block)
+   compare (Slot s1) (Slot s2) = (show s1.room ++ show s1.block) `compare` (show s2.room ++ show s2.block)
 
 instance showSlot :: Show Slot where
-  show (Slot s) = "{ room: " ++ show s.room ++" block: " ++ show s.block ++ "}"
+  show = gShow
 
 instance foreignSlot :: IsForeign Slot where
-  read val = do
-    room <- readProp "room" val :: F Room
-    block <- readProp "block" val :: F Block
-    return $ Slot {room: room, block: block}
+  read val = Slot <$> (
+    { room: _, block: _} <$>
+    readProp "room" val  <*>
+    readProp "block" val
+    )
 
 ------------
 --| Room |--
 ------------
 
-newtype Room = Room { roomName :: String, roomCapacity :: Number }
+newtype Room = Room { name :: String, capacity :: Number }
+
+derive instance genericRoom :: Generic Room
 
 instance showRoom :: Show Room where
-  show (Room r) = r.roomName
+  show = gShow
 
 instance eqRoom :: Eq Room where
-  (==) (Room r1) (Room r2) = r1.roomName == r2.roomName
-  (/=) (Room r1) (Room r2) = r1.roomName /= r2.roomName
+  eq (Room r1) (Room r2) = r1.name == r2.name
 
 instance foreignRoom :: IsForeign Room where
-  read val = do
-    name     <- readProp "roomName" val     :: F String
-    capacity <- readProp "roomCapacity" val :: F Number
-    return $ Room {roomName: name, roomCapacity: capacity}
+  read val = Room <$> (
+    { name: _, capacity: _} <$>
+    readProp "name" val     <*>
+    safeCapacity
+    )
+    where
+      safeCapacity :: F Number
+      safeCapacity = do
+        capacity <- readProp "capacity" val
+        if not (isNaN capacity) && isFinite capacity
+          then return capacity
+          else (Left (JSONError "Room Capacity could not be read"))
 
 -------------
 --| Block |--
 -------------
 
-newtype Block = Block { blockDescription :: String
-                      , blockStartHours :: Number
-                      , blockStartMinutes :: Number
-                      , blockEndHours :: Number
-                      , blockEndMinutes :: Number}
+newtype Block = Block { description :: String
+                      , startHours :: Number
+                      , startMinutes :: Number
+                      , endHours :: Number
+                      , endMinutes :: Number}
+
+derive instance genericBlock :: Generic Block
 
 instance showBlock :: Show Block where
-  show (Block b) = b.blockDescription
+  show (Block b) = b.description
 
 instance eqBlock :: Eq Block where
-  (==) (Block b1) (Block b2) = b1.blockDescription == b2.blockDescription
-                               && b1.blockStartHours == b2.blockStartHours
-                               && b1.blockStartMinutes == b2.blockStartMinutes
-                               && b1.blockEndHours == b2.blockEndHours
-                               && b1.blockEndMinutes == b2.blockEndMinutes
-
-  (/=) b1 b2 = not (b1 == b2)
+  eq (Block b1) (Block b2) = b1.description == b2.description
+                             && b1.startHours == b2.startHours
+                             && b1.startMinutes == b2.startMinutes
+                             && b1.endHours == b2.endHours
+                             && b1.endMinutes == b2.endMinutes
 
 instance ordBlock :: Ord Block where
-  compare (Block b1) (Block b2) = compare (hourDiff * 60 + minDiff) 0
-    where hourDiff = b1.blockStartHours - b2.blockStartHours
-          minDiff = b1.blockStartMinutes - b2.blockStartMinutes
-
-
+  compare (Block b1) (Block b2) = compare (hourDiff * 60.0 + minDiff) 0.0
+    where hourDiff = b1.startHours - b2.startHours
+          minDiff = b1.startMinutes - b2.startMinutes
 
 instance foreignBlock :: IsForeign Block where
-  read val = do
-    description <- readProp "blockDescription" val
-    startHours <- readProp "blockStartHours" val
-    startMinutes <- readProp "blockStartMinutes" val
-    endHours <- readProp "blockEndHours" val
-    endMinutes <- readProp "blockEndMinutes" val
-    return $ Block { blockDescription: description
-                   , blockStartHours: startHours
-                   , blockStartMinutes: startMinutes
-                   , blockEndHours: endHours
-                   , blockEndMinutes: endMinutes
-                   }
+  read val = Block <$> (
+    { description: _
+    , startHours: _
+    , startMinutes: _
+    , endHours: _
+    , endMinutes: _
+    } <$>
+    readProp "description" val <*>
+    readProp "startHours" val <*>
+    readProp "startMinutes" val <*>
+    readProp "endHours" val <*>
+    readProp "endMinutes" val
+    )
 
 ---------------
 --| Actions |--
@@ -154,58 +167,45 @@ data Action = AddTopic Topic
             | DeleteBlock Block
             | AssignTopic Slot Topic
             | UnassignTopic Topic
-            | ReplayActions [Action]
+            | ReplayActions (Array Action)
             | ShowError String
             | NOP
 
 instance foreignAction :: IsForeign Action where
 read val = case readProp "tag" val of
-  Right "AddTopic" -> do
-    t <- readProp "contents" val :: F Topic
-    return $ AddTopic t
-  Right "DeleteTopic" -> do
-    t <- readProp "contents" val :: F Topic
-    return $ DeleteTopic t
-  Right "AddRoom" -> do
-    r <- readProp "contents" val :: F Room
-    return $ AddRoom r
-  Right "DeleteRoom" -> do
-    r <- readProp "contents" val :: F Room
-    return $ DeleteRoom r
-  Right "AddBlock" -> do
-    b <- readProp "contents" val :: F Block
-    return $ AddBlock b
-  Right "DeleteBlock" -> do
-    b <- readProp "contents" val :: F Block
-    return $ DeleteBlock b
-  Right "AssignTopic" -> do
+  Right "AddTopic"      -> AddTopic <$> readProp "contents" val
+  Right "DeleteTopic"   -> DeleteTopic <$> readProp "contents" val
+  Right "AddRoom"       -> AddRoom <$> readProp "contents" val
+  Right "DeleteRoom"    -> DeleteRoom <$> readProp "contents" val
+  Right "AddBlock"      -> AddBlock <$> readProp "contents" val
+  Right "DeleteBlock"   -> DeleteBlock <$> readProp "contents" val
+  Right "AssignTopic"   ->
     let val' = parseAssignTopic val
-    s <- readProp "slot" val' :: F Slot
-    t <- readProp "topic" val' :: F Topic
-    return $ AssignTopic s t
-  Right "UnassignTopic" -> do
-    t <- readProp "contents" val :: F Topic
-    return $ UnassignTopic t
-  Right "ReplayEvents" -> do
-    actions <- readProp "contents" val :: F [Action]
-    return $ ReplayActions actions
-  Right "ShowError" -> do
-    m <- readProp "message" val :: F String
-    return $ ShowError m
-  Left e -> Right $ ShowError (show e)
+    in AssignTopic <$> readProp "slot" val' <*> readProp "topic" val'
+  Right "UnassignTopic" -> UnassignTopic <$> readProp "contents" val
+  Right "ReplayEvents"  -> ReplayActions <$> readProp "contents" val
+  Right "ShowError"     -> ShowError <$> readProp "message" val
+  Right a               ->
+    Right $ ShowError ("A foreign action could not be recognized. It was: " ++ a)
+  Left e                -> Right $ ShowError (show e)
+
+class AsForeign a where
+  serialize :: a -> Foreign
 
 instance actionAsForeign :: AsForeign Action where
   serialize (AddTopic (Topic t)) =
     toForeign { tag: "AddTopic"
-              , contents: { topicDescription: t.topicDescription
-                          , topicTyp: show t.topicTyp
+              , contents: { description: t.description
+                          , typ: show t.typ
+                          , host: t.host
                           }
               }
 
   serialize (DeleteTopic (Topic t)) =
     toForeign { tag: "DeleteTopic"
-              , contents: { topicDescription: t.topicDescription
-                          , topicTyp: show t.topicTyp
+              , contents: { description: t.description
+                          , typ: show t.typ
+                          , host: t.host
                           }
               }
   serialize (AddRoom (Room r)) =
@@ -224,28 +224,18 @@ instance actionAsForeign :: AsForeign Action where
     toForeign { tag: "DeleteBlock"
               , contents: b }
 
-  serialize (AssignTopic s t) =
-    toForeign { tag: "AssignTopic"
-              , contents:
-                [ toForeign s, toForeign t ]
-              }
-
+  serialize (AssignTopic s topic@(Topic t')) = serializeAssignTopic s topic (show t'.typ)
   serialize (UnassignTopic (Topic t)) =
     toForeign { tag: "UnassignTopic"
-              , contents: { topicDescription: t.topicDescription
-                          , topicTyp: show t.topicTyp
+              , contents: { description: t.description
+                          , typ: show t.typ
+                          , host: t.host
                           }
               }
 
-foreign import parseAssignTopic
-"""
-function parseAssignTopic(foreign) {
-  return {
-    topic : foreign.contents[1],
-    slot : foreign.contents[0]
-    }
-  }
-  """ :: Foreign -> Foreign
+foreign import parseAssignTopic :: Foreign -> Foreign
+foreign import serializeAssignTopic :: Slot -> Topic -> String -> Foreign
+
 
 -----------------
 --| UiActions |--
@@ -274,13 +264,13 @@ instance uiActionIsForeign :: IsForeign UiAction where
 
 type Timeslot = Tuple Slot Topic
 
-type AppState = { topics :: [Topic]
-                , rooms :: [Room]
-                , blocks :: [Block]
+type AppState = { topics :: Array Topic
+                , rooms :: Array Room
+                , blocks :: Array Block
                 , timeslots :: M.Map Slot Topic
                 }
 
-type Timetable = [Topic]
+type Timetable = Array Topic
 
 type UiState =
   { personalTimetable :: Timetable
@@ -293,35 +283,35 @@ type UiState =
 emptyUiState = { personalTimetable: [], selectedBlock: Nothing }
 emptyState = {topics: [], rooms:[], blocks:[], timeslots: (M.empty) :: M.Map Slot Topic }
 
-myRoom = Room {roomName: "Berlin", roomCapacity: 100}
-myRoom1 = Room {roomName: "Hamburg", roomCapacity: 80}
-myRoom2 = Room {roomName: "Köln", roomCapacity: 30}
+myRoom = Room {name: "Berlin", capacity: 100.0}
+myRoom1 = Room {name: "Hamburg", capacity: 80.0}
+myRoom2 = Room {name: "Köln", capacity: 30.0}
 
 myBlock = Block {
-  blockDescription:"First",
-  blockStartHours: 8,
-  blockStartMinutes: 0,
-  blockEndHours: 10,
-  blockEndMinutes: 0}
+  description:"First",
+  startHours: 8.0,
+  startMinutes: 0.0,
+  endHours: 10.0,
+  endMinutes: 0.0}
 myBlock1 = Block {
-  blockDescription:"Second",
-  blockStartHours: 8,
-  blockStartMinutes: 0,
-  blockEndHours: 10,
-  blockEndMinutes: 0}
+  description:"Second",
+  startHours: 8.0,
+  startMinutes: 0.0,
+  endHours: 10.0,
+  endMinutes: 0.0}
 
 mySlot = Slot {room:myRoom, block:myBlock}
 mySlot1 = Slot {room:myRoom1, block:myBlock1}
 
-myTopic = Topic  {topicDescription:"Purescript is great", topicTyp:Workshop}
-myTopic1 = Topic {topicDescription:"Reactive Design", topicTyp:Presentation}
-myTopic2 = Topic {topicDescription:"Functional Javascript", topicTyp:Discussion}
-myTopic3 = Topic {topicDescription:"Enemy of the State", topicTyp:Presentation}
-myTopic4 = Topic {topicDescription:"Wayyyyyyy too long name for a Topic.", topicTyp:Workshop}
-myTopic5 = Topic {topicDescription:"fix", topicTyp:Discussion}
+myTopic = Topic  {description:"Purescript is great", typ:Workshop, host:"host"}
+myTopic1 = Topic {description:"Reactive Design", typ:Presentation, host:"host"}
+myTopic2 = Topic {description:"Functional Javascript", typ:Discussion, host:"host"}
+myTopic3 = Topic {description:"Enemy of the State", typ:Presentation, host:"host"}
+myTopic4 = Topic {description:"Wayyyyyyy too long name for a Topic.", typ:Workshop, host:"host"}
+myTopic5 = Topic {description:"fix", typ:Discussion, host:"host"}
 
 myState1 = { topics: [myTopic, myTopic1, myTopic2, myTopic3, myTopic4, myTopic5]
            , rooms : [myRoom, myRoom1, myRoom2]
            , blocks : [myBlock, myBlock1]
-           , timeslots: M.fromList [Tuple mySlot myTopic, Tuple mySlot1 myTopic1]
+           , timeslots: M.fromList $ toList [Tuple mySlot myTopic, Tuple mySlot1 myTopic1]
            }

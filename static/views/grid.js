@@ -36,12 +36,12 @@ var Grid = React.createClass({
     var topics = (block, topicsForRoom) => {
       return topicsForRoom.map(({room: room, topic: topic}, index) => {
         let isChosen = this.props.personalTimetable
-          .filter( t => t.topicDescription === topic.topicDescription
-                        && t.topicTyp === topic.topicTyp).length !== 0;
+          .filter( t => t.description === topic.description
+                        && t.typ === topic.typ).length !== 0;
         return (
           <TopicListItem topic={topic} room={room} className="clickable"
             onClick={this.clickTopicHandler.bind(this, topic, isChosen)}
-            isChosen={isChosen} key={index}/>
+            isChosen={isChosen} key={topic.description}/>
         );
       }, this);
     };

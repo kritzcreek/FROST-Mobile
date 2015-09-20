@@ -1,17 +1,17 @@
 module Openspace.Ui.Emitter where
 
 import           Control.Monad.Eff
-import qualified Control.Monad.JQuery as J
+import qualified Control.Monad.Eff.JQuery as J
 import           Control.Plus
-import           Data.Array (append)
+import           DOM
 import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Traversable
-import           Data.Tuple hiding(zip)
-import           Rx.JQuery
+import           Data.Tuple
+import           Prelude
 import           Rx.Observable
 
-import           DOM
+foreign import onAsObservable :: forall eff. String -> J.JQuery -> Eff(dom :: DOM | eff) (Observable J.JQueryEvent)
 
 type Observer = Tuple String (Observable J.JQueryEvent)
 type Observers = M.Map String (Observable J.JQueryEvent)
@@ -25,8 +25,8 @@ getObservers = do
     timetableEmitter <- J.select "#personalTimetableContainer"
     let grid = mkObservable gridEmitter <$>
                ["SelectBlock", "UnselectBlock", "ChooseTopic", "UnchooseTopic"]
-    let personalTimetable = mkObservable timetableEmitter <$> ["UnselectTopic"] 
-    M.fromList <$> (sequence $ grid `append` personalTimetable)
+    let personalTimetable = mkObservable timetableEmitter <$> ["UnselectTopic"]
+    M.fromList <<< Data.List.toList <$> (sequence $ grid <> personalTimetable)
 
 emitterLookup :: Observers -> String -> Observable J.JQueryEvent
 emitterLookup es s =

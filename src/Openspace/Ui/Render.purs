@@ -1,7 +1,9 @@
 module Openspace.Ui.Render where
 
+import           Prelude
 import           Control.Apply
 import           Control.Monad.Eff
+import           Control.Monad.Eff.Console
 import           DOM
 import           Data.Array
 import           Data.Foreign
@@ -9,89 +11,76 @@ import           Data.Function
 import qualified Data.Map as M
 import           Data.Maybe
 import           Data.Tuple
-import           Debug.Trace
 import           Openspace.Types
 
-type AssignedTopic = { topic :: Foreign, room :: Room, block :: Block}
-type SanitizedTimetable = [AssignedTopic]
+type AssignedTopic = { topic :: SanitizedTopic, room :: Room, block :: Block}
+type SanitizedTimetable = Array AssignedTopic
 
-type TopicsForBlock = [{topic :: Foreign, room :: Room}]
+type SanitizedTopic = { description :: String, typ :: String, host :: String }
+
+sanitizeTopic :: Topic -> SanitizedTopic
+sanitizeTopic (Topic t) = { description: t.description
+                          , typ: show t.typ
+                          , host: t.host
+                          }
+
+type TopicsForBlock = Array {topic :: SanitizedTopic, room :: Room}
 
 topicsForBlock :: Block -> AppState -> TopicsForBlock
 topicsForBlock b as =
   concatMap (\r -> f (findIn r b as.timeslots) r) as.rooms
   where
-    f :: Maybe Foreign -> Room -> TopicsForBlock
+    f :: Maybe SanitizedTopic -> Room -> TopicsForBlock
     f s r = case s of
       Just t -> [{topic: t, room: r}]
       Nothing -> []
 
-findIn :: Room -> Block -> M.Map Slot Topic -> Maybe Foreign
+findIn :: Room -> Block -> M.Map Slot Topic -> Maybe SanitizedTopic
 findIn r b timeslots = M.lookup (Slot {block:b, room:r}) timeslots
-                       <#> serialize
+                       <#> sanitizeTopic
 
-makeGrid :: AppState -> [[Maybe Foreign]]
+makeGrid :: AppState -> Array (Array (Maybe SanitizedTopic))
 makeGrid as = (\r ->
                 (\b -> findIn r b as.timeslots ) <$> (sort as.blocks)
               ) <$> as.rooms
 
-foreign import renderGridImpl
-  """
-  function renderGridImpl(blocks, selectedBlock, topicsForBlock, personalTimetable){
-    return function(){
-      React.render(
-        React.createElement(Grid, {
-          blocks: blocks,
-          selectedBlock: selectedBlock,
-          topicsForBlock: topicsForBlock,
-          personalTimetable: personalTimetable
-        }),
-        document.getElementById('grid')
-      );
-    }
-  }
-  """ :: forall eff. Fn4 [Block] (Maybe Block) TopicsForBlock [Foreign] (Eff( dom::DOM | eff ) Unit)
+foreign import renderGridImpl :: forall eff.
+  Fn4
+  (Array Block)
+  (Maybe Block)
+  TopicsForBlock
+  (Array SanitizedTopic)
+  (Eff( dom::DOM | eff ) Unit)
 
-foreign import renderPersonalTimetableImpl
-  """
-  function renderPersonalTimetableImpl(timetable) {
-    return function(){
-      React.render(
-        React.createElement(Timetable, {
-          timetable: timetable
-        }),
-        document.getElementById('personalTimetable')
-      );
-    };
-  }
-  """ :: forall eff. SanitizedTimetable -> Eff( dom::DOM | eff ) Unit
+foreign import renderPersonalTimetableImpl :: forall eff.
+  SanitizedTimetable -> Eff( dom::DOM | eff ) Unit
 
-renderPersonalTimetable :: forall eff. AppState -> UiState -> Eff( dom::DOM, trace::Trace | eff ) Unit
+renderPersonalTimetable :: forall eff. AppState -> UiState -> Eff( dom::DOM, console::CONSOLE | eff ) Unit
 renderPersonalTimetable as us =
   renderPersonalTimetableImpl $ sorting $ concatMap findAssignedTopic us.personalTimetable
-  where timeslots :: [Tuple Slot Topic]
-        timeslots = M.toList as.timeslots
+  where timeslots :: Array (Tuple Slot Topic)
+        timeslots = Data.List.fromList (M.toList as.timeslots)
 
-        findAssignedTopic :: Topic -> [AssignedTopic]
+        findAssignedTopic :: Topic -> Array AssignedTopic
         findAssignedTopic t = maybe [] construct (timeslots !! (topicIndex t))
 
-        topicIndex :: Topic -> Number
-        topicIndex t = findIndex (isTopic t) timeslots
+        topicIndex :: Topic -> Int
+        topicIndex t = fromMaybe (-1) (findIndex (isTopic t) timeslots)
 
-        construct :: Tuple Slot Topic -> [AssignedTopic]
-        construct (Tuple (Slot s) t) = singleton { topic: serialize t, block: s.block, room: s.room }
+        construct :: Tuple Slot Topic -> Array AssignedTopic
+        construct (Tuple (Slot s) t) = singleton { topic: sanitizeTopic t, block: s.block, room: s.room }
 
         isTopic :: Topic -> Tuple Slot Topic -> Boolean
         isTopic t tuple = t == snd tuple
 
-        sorting :: [AssignedTopic] -> [AssignedTopic]
+        sorting :: Array AssignedTopic -> Array AssignedTopic
         sorting = sortBy \at1 at2 -> compare at1.block at2.block
 
 renderGrid :: forall eff. AppState -> UiState -> Eff( dom::DOM | eff ) Unit
 renderGrid as us = runFn4 renderGridImpl blocks us.selectedBlock topics timetable
   where topics = maybe [] (flip topicsForBlock as) us.selectedBlock
         blocks = (sort as.blocks)
-        timetable = (serialize <$> us.personalTimetable)
+        timetable = (sanitizeTopic <$> us.personalTimetable)
 
-renderApp :: forall eff. AppState -> UiState -> Eff( dom::DOM, trace::Trace | eff ) Unit
+renderApp :: forall eff. AppState -> UiState -> Eff( dom::DOM, console::CONSOLE | eff ) Unit
 renderApp as us = renderGrid as us *> renderPersonalTimetable as us

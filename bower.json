@@ -14,15 +14,14 @@
   ],
   "dependencies": {
     "purescript-arrays": "*",
-    "purescript-maybe": "*",
+    "purescript-dom": "*",
+    "purescript-foreign": "*",
+    "purescript-generics": "~0.6.0",
+    "purescript-globals": "~0.2.1",
+    "purescript-jquery": "*",
     "purescript-maps": "*",
-    "purescript-rx": "*",
-    "purescript-foreign": "*"
+    "purescript-maybe": "*",
+    "purescript-rx": "*"
   },
-  "devDependencies": {},
-  "resolutions": {
-    "purescript-foldable-traversable": "0.3.1",
-    "purescript-tuples": "0.3.4",
-    "purescript-monoid": "~0.2.0"
-  }
+  "devDependencies": {}
 }

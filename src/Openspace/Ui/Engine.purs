@@ -1,8 +1,9 @@
 module Openspace.Ui.Engine where
 
+import Prelude
 import Openspace.Types
 import Data.Maybe (Maybe(..))
-import Data.Array (delete, concatMap, filter)
+import Data.Array (delete, concatMap, filter, (:))
 import Data.Foldable (elem)
 
 evalUiAction :: UiAction -> UiState -> UiState
@@ -27,10 +28,10 @@ evalActionOnUi (DeleteBlock b) us =
 evalActionOnUi (ReplayActions as) us =
   us { personalTimetable = filter (flip elem validTopics) us.personalTimetable}
   where
-    validTopics :: [Topic]
+    validTopics :: Array Topic
     validTopics = concatMap isAddTopic as
 
-    isAddTopic :: Action -> [Topic]
+    isAddTopic :: Action -> Array Topic
     isAddTopic (AddTopic a) = [a]
     isAddTopic _ = []
 

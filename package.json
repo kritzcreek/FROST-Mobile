@@ -1,25 +1,27 @@
 {
-  "name": "FROST-Mobile",
-  "version": "0.1.0",
-  "description": "The Mobile-Frontend for the FROST Application.",
-  "main": "",
-  "private": false,
-  "author": "kRITZCREEK",
-  "license": "MIT",
-  "devDependencies": {
-    "babel-core": "^4.7.16",
-    "babel-loader": "^4.2.0",
-    "bower": "*",
-    "gulp": "^3.8.11",
-    "gulp-purescript": "^0.2.0",
-    "gulp-webpack": "^1.3.0",
-    "purs-loader": "0.0.3",
-    "webpack": "^1.7.3"
-  },
-  "dependencies": {
-    "lodash": "^3.5.0",
-    "moment": "^2.9.0",
-    "react": "^0.13.1",
-    "react-tools": "^0.13.1"
-  }
+    "name": "FROST-Mobile",
+    "version": "0.1.0",
+    "description": "The Mobile-Frontend for the FROST Application.",
+    "main": "",
+    "private": false,
+    "author": "kRITZCREEK",
+    "license": "MIT",
+    "devDependencies": {
+        "babel-core": "*",
+        "babel-loader": "*",
+        "bower": "*",
+        "gulp": "*",
+        "gulp-purescript": "*",
+        "webpack-stream": "*",
+        "purs-loader": "*",
+        "webpack": "*"
+    },
+    "dependencies": {
+        "lodash": "*",
+        "moment": "*",
+        "react": "*",
+        "jquery": "*",
+        "rx": "^3.0.0",
+        "rx-jquery": "^1.1.7"
+    }
 }
