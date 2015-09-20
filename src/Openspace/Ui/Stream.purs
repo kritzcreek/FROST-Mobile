@@ -45,8 +45,8 @@ netStream socket = do
 main = do
   -- TODO: getSocket :: Either SockErr Socket
   socketUrl <- getSocketUrl
-  let sockEmitter = getSocket ("ws://" ++ "frost.kritzcreek.me" ++ "/socket/0")
-  -- let sockEmitter = getSocket ("ws://" ++ socketUrl)
+  -- let sockEmitter = getSocket ("ws://" ++ "frost.kritzcreek.me" ++ "/socket/0")
+  let sockEmitter = getSocket ("ws://" ++ socketUrl)
   -- Initial State
 
   uiSt <- getTimetable "timetable" >>= newSTRef
